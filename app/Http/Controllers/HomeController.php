@@ -24,7 +24,7 @@ class HomeController extends Controller
             "shipping" => 'required'
         ];
 
-        $isWhatsappRequire = env("WHATSAPP_REQUIRE");
+        $isWhatsappRequire = env("WHATSAPP_REQUIRE") == true;
         if($isWhatsappRequire){
             $validationArray['phone'] = 'requried';
         }
@@ -67,11 +67,11 @@ class HomeController extends Controller
     private function verifyForm($requestData)
     {
         // Whatsapp Verified Checking
-        $isWhatsappRequire = env('WHATSAPP_REQUIRE');
+        $isWhatsappRequire = env('WHATSAPP_REQUIRE') == true;
 
         if ($isWhatsappRequire) {
 
-            $whatsappVerifyEnable = env('WHATSAPP_VERIFY');
+            $whatsappVerifyEnable = env('WHATSAPP_VERIFY') == true;
 
             if ($whatsappVerifyEnable) {
 

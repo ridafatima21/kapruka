@@ -36,11 +36,13 @@
                             </td>
                             <td style="padding: 10px 0; font-size: 16px;">{{ $data['email'] }}</td>
                         </tr>
+                        @if(isset($data['phone']))
                         <tr>
                             <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 30%;">
                                 Phone:</td>
                             <td style="padding: 10px 0; font-size: 14px;">{{ $data['phone'] }}</td>
                         </tr>
+                        @endif
                         @foreach ($data['productSizeColor'] as $key => $value)
                             <tr>
                                 <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 20%;">
