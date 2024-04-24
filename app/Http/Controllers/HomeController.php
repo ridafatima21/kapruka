@@ -18,12 +18,18 @@ class HomeController extends Controller
 
     public function sendShipmentData(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validationArray = [
             'name' => 'required',
             'email' => 'required|email',
-            'phone' => 'required',
             "shipping" => 'required'
-        ]);
+        ];
+
+        $isWhatsappRequire = env("WHATSAPP_REQUIRE");
+        if($isWhatsappRequire){
+            $validationArray['phone'] = 'requried';
+        }
+        
+        $validator = Validator::make($request->all(), $validationArray);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
@@ -61,35 +67,40 @@ class HomeController extends Controller
     private function verifyForm($requestData)
     {
         // Whatsapp Verified Checking
+        $isWhatsappRequire = env('WHATSAPP_REQUIRE');
 
-        $whatsappVerifyEnable = env('WHATSAPP_VERIFY');
+        if ($isWhatsappRequire) {
 
-        if ($whatsappVerifyEnable) {
+            $whatsappVerifyEnable = env('WHATSAPP_VERIFY');
 
-            $needWhatsappCheck = true;
+            if ($whatsappVerifyEnable) {
 
-            $countryCodesWhatsapp = env('WHATSAPP_VERIFICATION_REQUIRED_COUNTRY_CODES');
+                $needWhatsappCheck = true;
 
-            if ($countryCodesWhatsapp !== 'all') {
-                $countryCodesWhatsappPattern = '/^(' . $countryCodesWhatsapp . ')/';
-                $whatsappNumber = ltrim($requestData['phone'], '+');
+                $countryCodesWhatsapp = env('WHATSAPP_VERIFICATION_REQUIRED_COUNTRY_CODES');
 
-                if (!preg_match($countryCodesWhatsappPattern, $whatsappNumber)) $needWhatsappCheck = false;
-            }
+                if ($countryCodesWhatsapp !== 'all') {
+                    $countryCodesWhatsappPattern = '/^(' . $countryCodesWhatsapp . ')/';
+                    $whatsappNumber = ltrim($requestData['phone'], '+');
 
-            if ($needWhatsappCheck) {
-                $whatsappForm = FormsWhatsapp::where('phone', $requestData['phone'])->first();
-
-                if (!$whatsappForm) {
-                    return response()->json(['error' => 'Please verify the whatsapp number'], 400);
+                    if (!preg_match($countryCodesWhatsappPattern, $whatsappNumber)) $needWhatsappCheck = false;
                 }
 
-                if (!$whatsappForm->is_whatsapp_verified) {
-                    return response()->json(['error' => 'Please verify the whatsapp number'], 400);
-                }
+                if ($needWhatsappCheck) {
+                    $whatsappForm = FormsWhatsapp::where('phone', $requestData['phone'])->first();
 
-                $whatsappForm->delete();
+                    if (!$whatsappForm) {
+                        return response()->json(['error' => 'Please verify the whatsapp number'], 400);
+                    }
+
+                    if (!$whatsappForm->is_whatsapp_verified) {
+                        return response()->json(['error' => 'Please verify the whatsapp number'], 400);
+                    }
+
+                    $whatsappForm->delete();
+                }
             }
+
         }
 
         return true;
