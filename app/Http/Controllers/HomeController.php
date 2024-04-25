@@ -6,6 +6,7 @@ use App\Mail\ShipmentCustomerMail;
 use App\Mail\ShipmentMail;
 use App\Models\FormsWhatsapp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -24,9 +25,9 @@ class HomeController extends Controller
             "shipping" => 'required'
         ];
 
-        $isWhatsappRequire = env("WHATSAPP_REQUIRE");
+        $isWhatsappRequire = env("WHATSAPP_REQUIRE") == true;
         if($isWhatsappRequire){
-            $validationArray['phone'] = 'requried';
+            $validationArray['phone'] = 'required';
         }
         
         $validator = Validator::make($request->all(), $validationArray);
@@ -37,19 +38,12 @@ class HomeController extends Controller
 
         $requestData = $request->all();
 
-        // Extract Product Size Color Fields - If Avaiable
+        $productSizeColor = $request->input('product_size_color') ?? null;
+        $links = $request->input('links') ?? null;
 
-        $productSizeColor = [];
-        foreach ($requestData as $key => $value) {
-            if (strpos($key, 'product_size_color_') === 0) {
-                $productSizeColor[$key] = $value;
-                unset($requestData[$key]);
-            }
-        }
-
-        // Pass optional fields to blade view
-        $requestData['productSizeColor'] = $productSizeColor;
-
+        if($productSizeColor) $requestData['product_size_color'] = $productSizeColor;
+        if($links) $requestData['links'] = json_decode($links, true);
+        
         $response = $this->verifyForm($requestData);
         if ($response !== true) return $response;
 
@@ -67,11 +61,11 @@ class HomeController extends Controller
     private function verifyForm($requestData)
     {
         // Whatsapp Verified Checking
-        $isWhatsappRequire = env('WHATSAPP_REQUIRE');
+        $isWhatsappRequire = env('WHATSAPP_REQUIRE') == true;
 
         if ($isWhatsappRequire) {
 
-            $whatsappVerifyEnable = env('WHATSAPP_VERIFY');
+            $whatsappVerifyEnable = env('WHATSAPP_VERIFY') == true;
 
             if ($whatsappVerifyEnable) {
 

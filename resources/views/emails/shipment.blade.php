@@ -36,18 +36,45 @@
                             </td>
                             <td style="padding: 10px 0; font-size: 16px;">{{ $data['email'] }}</td>
                         </tr>
+
+                        @if(isset($data['phone']))
                         <tr>
                             <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 30%;">
                                 Phone:</td>
                             <td style="padding: 10px 0; font-size: 14px;">{{ $data['phone'] }}</td>
                         </tr>
-                        @foreach ($data['productSizeColor'] as $key => $value)
-                            <tr>
-                                <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 20%;">
-                                    {{ ucfirst(str_replace('_', ' ', $key)) }}:</td>
-                                <td style="padding: 10px 0; font-size: 16px;">{{ $value }}</td>
-                            </tr>
-                        @endforeach
+                        @endif
+
+                        @if(isset($data['product_size_color']))
+                        <tr>
+                            <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 30%;">
+                                Product Size Color:</td>
+                            <td style="padding: 10px 0; font-size: 14px;">{{ $data['product_size_color'] }}</td>
+                        </tr>
+                        @endif
+
+                        @if(isset($data['links']) && is_array($data['links']))
+                        <tr>
+                            <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 30%;">
+                                Links:
+                            </td>
+                            <td style="padding: 10px 0; font-size: 14px;">
+                                <ul>
+                                    @foreach($data['links'] as $link)
+                                        <li style="padding-bottom: 10px;">
+                                            <a href="{{ $link['product_url'] }}">Product Link</a>
+                                            @if(isset($link['product_size_color']))
+                                                <ul style="padding-left: 0; color: #fff;">
+                                                    <li style="padding-top: 10px;">Product Size/Color: {{ $link['product_size_color'] }}</li>
+                                                </ul>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </td>
+                        </tr>
+                        @endif
+                        
                         <tr>
                             <td style="padding: 5px 10px 5px 0px; font-size: 16px; font-weight: bold; width: 20%;">
                                 Message:</td>
