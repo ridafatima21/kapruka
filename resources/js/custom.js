@@ -10,6 +10,8 @@ var iti;
 var OTPWhatsappCountdownInterval;
 var verifiedWhatsappNumber;
 
+var len = 1;
+
 let initialForm = $("#initialForm");
 initialForm.validate();
 
@@ -149,24 +151,39 @@ function addTelWhatsappValidationMethod(whatsappVerifyEnable) {
 */
 
 function addProductSizeColorInput() {
-    var len = $(this).index() + 1;
-    var targetElement = $(this).parent().parent(".product-size");
-    var inputExists = targetElement.find('input[name^="product_size_color_"]').length > 0;
+    let id = '';
+    let targetInputElement;
+    let targetElement = $(this).closest(".product-size");
+    let allProductSizeColors = $(".product-size-color");
 
+    let len = allProductSizeColors.index($(this)) + 1;
+
+    if ($(this).hasClass('inner')) {
+        id = 'product_size_color';
+        targetInputElement = targetElement.find('input[name^="product_size_color"]');
+    } else {
+        id = `product_size_color_${len}`;
+        targetInputElement = targetElement.find('input[name^="product_size_color_"]');
+    }
+
+    var inputExists = targetInputElement.length > 0;
     if (inputExists) {
-        targetElement.find('input[name^="product_size_color_"]').closest('.product-size-color-parent').remove();
+        targetInputElement.closest('.product-size-color-parent').remove();
+        len--;
     } else {
         targetElement.append(`
                 <div class="col-auto mt-2 product-size-color-parent">
                     <div class="form-group">
-                        <input type="text" class="form-control" name="product_size_color_${len}" id="product_size_color_${len}">
+                        <input type="text" class="form-control" name="${id}" id="${id}">
                     </div>
                 </div>
             `);
+        len++;
     }
 }
 
 function addMoreLinks() {
+    removeShipmentForm();
 
     if ($("#product-links .form-group:eq(0) > .product-size").length == 0) {
         $("#product-links .form-group:eq(0)").append(`<div class="row product-size my-3">
@@ -192,7 +209,14 @@ function addMoreLinks() {
         `;
 
     $("#product-links").append(html);
+    $("#remove-more-links").removeClass("d-none");
 
+}
+
+function removeMoreLinks() {
+    let productLinks = $("#product-links");
+    if (productLinks.children().length > 1) productLinks.children().last().remove();
+    if (productLinks.children().length == 1) $(this).addClass("d-none");
 }
 
 function createShipmentForm() {
@@ -230,7 +254,7 @@ function createShipmentForm() {
                             <div class="row product-size my-3">
                                 <div class="col-auto align-self-center">
                                     <a href="javascript:void(0)"
-                                        class="product-size-color text-decoration-none text-secondary">
+                                        class="product-size-color inner text-decoration-none text-secondary">
                                             <small>+ Add Product Size/Color</small>
                                     </a>
                                 </div>
@@ -288,6 +312,11 @@ function createShipmentForm() {
         $("#shipmentForm").replaceWith(form);
     }
 
+}
+
+function removeShipmentForm(){
+    $("#shipmentForm").remove();
+    $(".shipment-form-card").addClass("d-none");
 }
 
 function showWhatsappVerifyBtn() {
@@ -436,6 +465,24 @@ function onShipmentFormSubmit(e) {
             const action = form.action;
             const formData = new FormData(form);
 
+            // Append the Links and their product size color if any
+
+            var structuredData = [];
+            $('input[name^="product_url_"]').each(function () {
+                var productUrl = $(this).val();
+
+                var productData = {
+                    product_url: productUrl
+                };
+
+                var productSizeColor = $(this).closest('.form-group').find('input[name^="product_size_color_"]');
+                if(productSizeColor.length > 0) productData['product_size_color'] = productSizeColor.val();
+
+                structuredData.push(productData);
+            });
+
+            formData.append("links", JSON.stringify(structuredData));
+
             // Send Request
 
             showLoader();
@@ -447,9 +494,7 @@ function onShipmentFormSubmit(e) {
                 contentType: false,
                 success: function (response) {
                     successModal(response.message);
-                    createShipmentForm();
-                    $("#shipmentForm").remove();
-                    $(".shipment-form-card").addClass("d-none");
+                    removeShipmentForm();
                 },
                 error: function (response) {
                     let isErrorIdentify = false;
@@ -469,9 +514,9 @@ function onShipmentFormSubmit(e) {
                     }
                     errorHtml += '</ul>';
 
-                    if(isErrorIdentify){
+                    if (isErrorIdentify) {
                         FailModal(errorHtml, true);
-                    }else{
+                    } else {
                         FailModal("Something Went Wrong. Please Try Again Later !");
                     }
                 },
@@ -580,6 +625,8 @@ function OTPWhatsappStopCountdown() {
 */
 
 $("#add-more-links").on("click", addMoreLinks);
+$("#remove-more-links").on("click", removeMoreLinks);
+
 $(document).on("click", ".product-size-color", addProductSizeColorInput);
 
 $(initialForm).on('submit', function (e) {
@@ -662,7 +709,7 @@ $(initialForm).on('submit', function (e) {
             errorPlacement: function (error, element) {
                 if (element.attr("id") == 'air-shipping') {
                     error.insertAfter(element.siblings("small"));
-                } else if (element.attr("id") == 'phone'){
+                } else if (element.attr("id") == 'phone') {
                     error.insertAfter(element.parent(".iti--allow-dropdown"))
                 } else {
                     error.addClass('no-margin-error');

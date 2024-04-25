@@ -13,6 +13,7 @@ var isWhatsappRequire = document.body.dataset.whatsappRequire == true;
 var iti;
 var OTPWhatsappCountdownInterval;
 var verifiedWhatsappNumber;
+var len = 1;
 var initialForm = $("#initialForm");
 initialForm.validate();
 
@@ -126,31 +127,54 @@ function addTelWhatsappValidationMethod(whatsappVerifyEnable) {
 */
 
 function addProductSizeColorInput() {
-  var len = $(this).index() + 1;
-  var targetElement = $(this).parent().parent(".product-size");
-  var inputExists = targetElement.find('input[name^="product_size_color_"]').length > 0;
-  if (inputExists) {
-    targetElement.find('input[name^="product_size_color_"]').closest('.product-size-color-parent').remove();
+  var id = '';
+  var targetInputElement;
+  var targetElement = $(this).closest(".product-size");
+  var allProductSizeColors = $(".product-size-color");
+  var len = allProductSizeColors.index($(this)) + 1;
+  if ($(this).hasClass('inner')) {
+    id = 'product_size_color';
+    targetInputElement = targetElement.find('input[name^="product_size_color"]');
   } else {
-    targetElement.append("\n                <div class=\"col-auto mt-2 product-size-color-parent\">\n                    <div class=\"form-group\">\n                        <input type=\"text\" class=\"form-control\" name=\"product_size_color_".concat(len, "\" id=\"product_size_color_").concat(len, "\">\n                    </div>\n                </div>\n            "));
+    id = "product_size_color_".concat(len);
+    targetInputElement = targetElement.find('input[name^="product_size_color_"]');
+  }
+  var inputExists = targetInputElement.length > 0;
+  if (inputExists) {
+    targetInputElement.closest('.product-size-color-parent').remove();
+    len--;
+  } else {
+    targetElement.append("\n                <div class=\"col-auto mt-2 product-size-color-parent\">\n                    <div class=\"form-group\">\n                        <input type=\"text\" class=\"form-control\" name=\"".concat(id, "\" id=\"").concat(id, "\">\n                    </div>\n                </div>\n            "));
+    len++;
   }
 }
 function addMoreLinks() {
+  removeShipmentForm();
   if ($("#product-links .form-group:eq(0) > .product-size").length == 0) {
     $("#product-links .form-group:eq(0)").append("<div class=\"row product-size my-3\">\n                <div class=\"col-auto align-self-center\">\n                    <a href=\"javascript:void(0)\"  class=\"product-size-color text-decoration-none text-secondary\" ><small>+ Add Product Size/Color</small></a>\n                </div>\n            </div>");
   }
   var count = $("#product-links .form-group").length + 1;
   var html = "\n            <div class=\"form-group my-3\">\n                <input type=\"text\" required name=\"product_url_".concat(count, "\" id=\"product_url_").concat(count, "\" class=\"form-control\"\n                    placeholder=\"Enter Your Product Full URL\"\n                >\n                <div class=\"row product-size my-3\">\n                    <div class=\"col-auto align-self-center\">\n                        <a href=\"javascript:void(0)\"  class=\"product-size-color text-decoration-none text-secondary\" ><small>+ Add Product Size/Color</small></a>\n                    </div>\n                </div>\n            </div>\n        ");
   $("#product-links").append(html);
+  $("#remove-more-links").removeClass("d-none");
+}
+function removeMoreLinks() {
+  var productLinks = $("#product-links");
+  if (productLinks.children().length > 1) productLinks.children().last().remove();
+  if (productLinks.children().length == 1) $(this).addClass("d-none");
 }
 function createShipmentForm() {
-  var form = "\n                <form action=\"".concat(shipmentFormRoute, "\" id=\"shipmentForm\">\n                    <div class=\"row\">\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-group\">\n                                <input type=\"text\" id=\"name\" placeholder=\"Your name here\"\n                                    name=\"name\" class=\"form-control mb-2\" required>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-group\">\n                                <input type=\"email\" name=\"email\" placeholder=\"Your email here\"\n                                    id=\"email\" class=\"form-control mb-2\" required>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-group position-relative\">\n                                <input type=\"tel\" name=\"phone\" placeholder=\"Your whatsapp number here\"\n                                    id=\"phone\" class=\"form-control mb-2\">\n                                <button \n                                    type=\"button\"\n                                    class=\"btn btn-dark px-2 py-1 rounded-1 verify-btn whatsapp-verify-btn\"\n                                    id=\"whatsapp-verify-btn\"\n                                    data-action=\"").concat(whatsappVerifySendRoute, "\"\n                                    data-whatsapp-verify-status=\"").concat(whatsappVerifyStatus, "\"\n                                >\n                                    Verify\n                                </button>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"row product-size my-3\">\n                                <div class=\"col-auto align-self-center\">\n                                    <a href=\"javascript:void(0)\"\n                                        class=\"product-size-color text-decoration-none text-secondary\">\n                                            <small>+ Add Product Size/Color</small>\n                                    </a>\n                                </div>\n                            </div>\n                        </div>\n                        <div class=\"col-12\">\n                            <div class=\"form-check\">\n                                <input class=\"form-check-input\" type=\"radio\" name=\"shipping\" id=\"air-shipping\"\n                                    value=\"air-shipping\" required>\n                                <label class=\"form-check-label\" for=\"air-shipping\">\n                                    Air Shipping\n                                </label>\n                                <small class=\"text-secondary d-block\">Takes 8 to 11 business days. Good for small items.\n                                        i.e. laptops, cameras, few books, etc.</small>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-check\">\n                                <input class=\"form-check-input\" type=\"radio\" name=\"shipping\" id=\"sea-shipping\"\n                                    value=\"sea-shipping\" required>\n                                <label class=\"form-check-label\" for=\"sea-shipping\">\n                                    Sea Shipping\n                                </label>\n                                <small class=\"text-secondary d-block\">Takes 4 to 6 weeks. Good for very heavy items.i.e.\n                                        TVs, large electronics, dozens of books, etc.</small>\n                            </div>\n                        </div>\n                        <div class=\"col-12 mt-3\">\n                            <div class=\"form-group text-center\">\n                                <input type=\"submit\" value=\"Submit Request\" class=\"btn btn-sm btn-primary p-2\">\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2 error back-errors\" id=\"inquiries-errors\"></div>\n                    </div>\n                </form>\n        ");
+  var form = "\n                <form action=\"".concat(shipmentFormRoute, "\" id=\"shipmentForm\">\n                    <div class=\"row\">\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-group\">\n                                <input type=\"text\" id=\"name\" placeholder=\"Your name here\"\n                                    name=\"name\" class=\"form-control mb-2\" required>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-group\">\n                                <input type=\"email\" name=\"email\" placeholder=\"Your email here\"\n                                    id=\"email\" class=\"form-control mb-2\" required>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-group position-relative\">\n                                <input type=\"tel\" name=\"phone\" placeholder=\"Your whatsapp number here\"\n                                    id=\"phone\" class=\"form-control mb-2\">\n                                <button \n                                    type=\"button\"\n                                    class=\"btn btn-dark px-2 py-1 rounded-1 verify-btn whatsapp-verify-btn\"\n                                    id=\"whatsapp-verify-btn\"\n                                    data-action=\"").concat(whatsappVerifySendRoute, "\"\n                                    data-whatsapp-verify-status=\"").concat(whatsappVerifyStatus, "\"\n                                >\n                                    Verify\n                                </button>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"row product-size my-3\">\n                                <div class=\"col-auto align-self-center\">\n                                    <a href=\"javascript:void(0)\"\n                                        class=\"product-size-color inner text-decoration-none text-secondary\">\n                                            <small>+ Add Product Size/Color</small>\n                                    </a>\n                                </div>\n                            </div>\n                        </div>\n                        <div class=\"col-12\">\n                            <div class=\"form-check\">\n                                <input class=\"form-check-input\" type=\"radio\" name=\"shipping\" id=\"air-shipping\"\n                                    value=\"air-shipping\" required>\n                                <label class=\"form-check-label\" for=\"air-shipping\">\n                                    Air Shipping\n                                </label>\n                                <small class=\"text-secondary d-block\">Takes 8 to 11 business days. Good for small items.\n                                        i.e. laptops, cameras, few books, etc.</small>\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2\">\n                            <div class=\"form-check\">\n                                <input class=\"form-check-input\" type=\"radio\" name=\"shipping\" id=\"sea-shipping\"\n                                    value=\"sea-shipping\" required>\n                                <label class=\"form-check-label\" for=\"sea-shipping\">\n                                    Sea Shipping\n                                </label>\n                                <small class=\"text-secondary d-block\">Takes 4 to 6 weeks. Good for very heavy items.i.e.\n                                        TVs, large electronics, dozens of books, etc.</small>\n                            </div>\n                        </div>\n                        <div class=\"col-12 mt-3\">\n                            <div class=\"form-group text-center\">\n                                <input type=\"submit\" value=\"Submit Request\" class=\"btn btn-sm btn-primary p-2\">\n                            </div>\n                        </div>\n                        <div class=\"col-12 my-2 error back-errors\" id=\"inquiries-errors\"></div>\n                    </div>\n                </form>\n        ");
   if ($("#shipmentForm").length == 0) {
     var html = "\n                <section class=\"container my-5\">\n                    <div class=\"row justify-content-center\">\n                        <div class=\"col-lg-6 col-12\">\n                            <div class=\"card bg-dark text-light border-light shipment-form-card\">\n                                <div class=\"card-body\">\n                                    <h4 class=\"text-light text-center mt-2 mb-3\">Request Form</h4>\n                                    ".concat(form, "\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </section>\n            ");
     $(html).insertAfter(".links-section");
   } else {
     $("#shipmentForm").replaceWith(form);
   }
+}
+function removeShipmentForm() {
+  $("#shipmentForm").remove();
+  $(".shipment-form-card").addClass("d-none");
 }
 function showWhatsappVerifyBtn() {
   var countryDialCode = iti.getSelectedCountryData().dialCode;
@@ -280,6 +304,20 @@ function onShipmentFormSubmit(e) {
       var action = form.action;
       var formData = new FormData(form);
 
+      // Append the Links and their product size color if any
+
+      var structuredData = [];
+      $('input[name^="product_url_"]').each(function () {
+        var productUrl = $(this).val();
+        var productData = {
+          product_url: productUrl
+        };
+        var productSizeColor = $(this).closest('.form-group').find('input[name^="product_size_color_"]');
+        if (productSizeColor.length > 0) productData['product_size_color'] = productSizeColor.val();
+        structuredData.push(productData);
+      });
+      formData.append("links", JSON.stringify(structuredData));
+
       // Send Request
 
       showLoader();
@@ -291,9 +329,7 @@ function onShipmentFormSubmit(e) {
         contentType: false,
         success: function success(response) {
           successModal(response.message);
-          createShipmentForm();
-          $("#shipmentForm").remove();
-          $(".shipment-form-card").addClass("d-none");
+          removeShipmentForm();
         },
         error: function error(response) {
           var _response$responseJSO3;
@@ -402,6 +438,7 @@ function OTPWhatsappStopCountdown() {
 */
 
 $("#add-more-links").on("click", addMoreLinks);
+$("#remove-more-links").on("click", removeMoreLinks);
 $(document).on("click", ".product-size-color", addProductSizeColorInput);
 $(initialForm).on('submit', function (e) {
   e.preventDefault();

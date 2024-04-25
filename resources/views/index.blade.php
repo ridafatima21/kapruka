@@ -68,10 +68,14 @@
                                 </div>
                             </div>
                             <div class="row text-center mt-3 mb-2">
-                                <a href="javascript:void(0)" id="add-more-links"
-                                    class="text-decoration-none add-remove-link">
-                                    + Add More Links
-                                </a>
+                                <div class="col-12">
+                                    <a href="javascript:void(0)" id="remove-more-links" class="text-danger text-decoration-none me-2 d-none">
+                                        - Remove Links
+                                    </a>
+                                    <a href="javascript:void(0)" id="add-more-links" class="text-decoration-none">
+                                        + Add More Links
+                                    </a>
+                                </div>
                             </div>
                         </form>
                     </div>
