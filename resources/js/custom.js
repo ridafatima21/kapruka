@@ -182,15 +182,20 @@ function addProductSizeColorInput() {
     }
 }
 
+function getProductSizeLinkHtml(){
+    return `<div class="row product-size my-3">
+            <div class="col-auto align-self-center">
+                <a href="javascript:void(0)"  class="product-size-color text-decoration-none text-secondary" ><small>+ Add Product Size/Color</small></a>
+            </div>
+    </div>`
+}
+
 function addMoreLinks() {
     removeShipmentForm();
 
-    if ($("#product-links .form-group:eq(0) > .product-size").length == 0) {
-        $("#product-links .form-group:eq(0)").append(`<div class="row product-size my-3">
-                <div class="col-auto align-self-center">
-                    <a href="javascript:void(0)"  class="product-size-color text-decoration-none text-secondary" ><small>+ Add Product Size/Color</small></a>
-                </div>
-            </div>`);
+    let productLinks = $("#product-links");
+    if (productLinks.children().length == 1) {
+        $("#product-links .form-group:eq(0)").append(getProductSizeLinkHtml());
     }
 
     var count = $("#product-links .form-group").length + 1;
@@ -200,11 +205,7 @@ function addMoreLinks() {
                 <input type="text" required name="product_url_${count}" id="product_url_${count}" class="form-control"
                     placeholder="Enter Your Product Full URL"
                 >
-                <div class="row product-size my-3">
-                    <div class="col-auto align-self-center">
-                        <a href="javascript:void(0)"  class="product-size-color text-decoration-none text-secondary" ><small>+ Add Product Size/Color</small></a>
-                    </div>
-                </div>
+                ${getProductSizeLinkHtml()}
             </div>
         `;
 
@@ -216,10 +217,14 @@ function addMoreLinks() {
 function removeMoreLinks() {
     let productLinks = $("#product-links");
     if (productLinks.children().length > 1) productLinks.children().last().remove();
-    if (productLinks.children().length == 1) $(this).addClass("d-none");
+    if (productLinks.children().length == 1){
+        productLinks.find(".product-size").remove();
+        $(this).addClass("d-none");
+    }
 }
 
 function createShipmentForm() {
+    let links = $("#product-links").children().length;
     var form = `
                 <form action="${shipmentFormRoute}" id="shipmentForm">
                     <div class="row">
@@ -250,17 +255,21 @@ function createShipmentForm() {
                                 </button>
                             </div>
                         </div>
-                        <div class="col-12 my-2">
-                            <div class="row product-size my-3">
-                                <div class="col-auto align-self-center">
-                                    <a href="javascript:void(0)"
-                                        class="product-size-color inner text-decoration-none text-secondary">
-                                            <small>+ Add Product Size/Color</small>
-                                    </a>
+
+                        ${links == 1 ? `
+                            <div class="col-12 my-2">
+                                <div class="row product-size my-3">
+                                    <div class="col-auto align-self-center">
+                                        <a href="javascript:void(0)"
+                                            class="product-size-color inner text-decoration-none text-secondary">
+                                                <small>+ Add Product Size/Color</small>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-12">
+                        ` : ''}
+
+                        <div class="col-12 ${links != 1 ? 'my-2' : ''}">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="shipping" id="air-shipping"
                                     value="air-shipping" required>
@@ -271,6 +280,7 @@ function createShipmentForm() {
                                         i.e. laptops, cameras, few books, etc.</small>
                             </div>
                         </div>
+
                         <div class="col-12 my-2">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="shipping" id="sea-shipping"
